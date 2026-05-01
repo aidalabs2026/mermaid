@@ -1,0 +1,77 @@
+---
+import BaseLayout from '~/layouts/BaseLayout.astro';
+import { CONTACT_EMAIL, SITE_NAME } from '~/consts';
+---
+
+<BaseLayout
+  title="About"
+  description={`About ${SITE_NAME}: what this site is, who runs it, and why we built another Mermaid editor.`}
+>
+  <article class="prose">
+    <h1>About {SITE_NAME}</h1>
+
+    <p>
+      {SITE_NAME} is an independent, ad-supported developer utility. The goal
+      is simple: a fast, accurate, privacy-respecting way to render Mermaid
+      diagrams — paired with short, honest explanations of each diagram type
+      so you can learn while you sketch.
+    </p>
+
+    <h2>What makes this different</h2>
+    <ul>
+      <li>
+        <strong>No ads inside the editor.</strong> The preview tool's first
+        fold is the editor. Ads, if any, sit below the fold or on the guides.
+      </li>
+      <li>
+        <strong>Rendering happens on your device.</strong> Mermaid.js runs in
+        your browser; there is no server in the loop.
+      </li>
+      <li>
+        <strong>Each diagram type comes with a guide.</strong> If you're not
+        sure when to reach for a sequence diagram versus a flowchart, we'd
+        rather give you a five-minute read than send you back to search results.
+      </li>
+      <li>
+        <strong>Strict-mode rendering.</strong> Mermaid is initialised with
+        <code>securityLevel: 'strict'</code>, so pasted snippets cannot inject
+        scripts into the page.
+      </li>
+    </ul>
+
+    <h2>Who runs this</h2>
+    <p>
+      {SITE_NAME} is a one-person project operated from South Korea as part of
+      a portfolio of small, focused web utilities. It is not affiliated with
+      the Mermaid project, GitHub, or any specific documentation tool. To get
+      in touch, use the <a href="/contact/">contact page</a> or email
+      <a href={`mailto:${CONTACT_EMAIL}`}>{CONTACT_EMAIL}</a>.
+    </p>
+
+    <h2>How it's built</h2>
+    <p>
+      The site is a static Astro build served by Nginx on an Oracle Cloud
+      Always Free instance. The Mermaid library is bundled at build time and
+      lazy-loaded only on the preview page, so the rest of the site stays
+      light. There is no user account, no tracking pixel for your diagrams,
+      and no server-side analytics of your input. See the
+      <a href="/privacy/">Privacy Policy</a> for the full picture.
+    </p>
+
+    <h2>Roadmap in brief</h2>
+    <ul>
+      <li>Live preview with theme picker, SVG/PNG export, and share URL — <em>available now</em></li>
+      <li>Per-type landing pages and cheat sheets for the eight most-used Mermaid diagrams — <em>in progress</em></li>
+      <li>Guides and glossary for diagrams-as-code workflows — <em>in progress</em></li>
+      <li>Optional server-side rendering API for large diagrams (10&nbsp;000+ nodes) — <em>later</em></li>
+      <li>Short share links (<code>mermaid.aidalabs.kr/s/&lt;id&gt;</code>) — <em>later</em></li>
+    </ul>
+
+    <h2>Support the project</h2>
+    <p>
+      If this tool saves you time, the best thing you can do is link to it
+      from a teammate's PR or share a guide on social media. Ad revenue funds
+      the server bill; word of mouth funds the motivation.
+    </p>
+  </article>
+</BaseLayout>

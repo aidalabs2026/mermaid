@@ -1,0 +1,36 @@
+---
+import BaseLayout from '~/layouts/BaseLayout.astro';
+import { getCollection } from 'astro:content';
+import { SITE_NAME } from '~/consts';
+
+const all = (await getCollection('glossary'))
+  .sort((a, b) => a.data.title.localeCompare(b.data.title));
+---
+
+<BaseLayout
+  title="Glossary"
+  description={`Short definitions for the Mermaid and diagrams-as-code terms used across ${SITE_NAME}.`}
+>
+  <article class="prose">
+    <h1>Glossary</h1>
+    <p>
+      Short definitions for the terms you'll meet across the diagram type
+      pages and the guides. Each entry is a quick read; for the full picture,
+      follow the links into <a href="/diagrams/">diagram types</a> or
+      <a href="/guides/">guides</a>.
+    </p>
+
+    <ul>
+      {all.map((g) => (
+        <li>
+          <a href={`/glossary/${g.id}/`}><strong>{g.data.title}</strong></a> —
+          {' '}{g.data.description}
+        </li>
+      ))}
+    </ul>
+
+    {all.length === 0 && (
+      <p><em>No glossary entries yet — check back soon.</em></p>
+    )}
+  </article>
+</BaseLayout>

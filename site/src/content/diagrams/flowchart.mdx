@@ -1,0 +1,48 @@
+---
+title: Flowchart
+description: Boxes and arrows for processes, decisions, and pipelines. The most-used Mermaid diagram type and a good starting point.
+mermaidKeyword: flowchart
+order: 1
+lastUpdated: 2026-05-01
+sampleCode: |
+  flowchart TD
+    A[User opens app] --> B{Logged in?}
+    B -- Yes --> C[Show dashboard]
+    B -- No --> D[Show login]
+    D --> E[Authenticate]
+    E --> C
+---
+
+## When to reach for a flowchart
+
+Flowcharts shine when you want to show **what happens, in what order, with which branches**. They are the right pick when:
+
+- You're documenting a process that has clear decision points (`if/else`, retry, fallback).
+- Readers do not need timing information (use a sequence diagram for that).
+- Most boxes have one or two arrows in and out — once a node has five arrows, the diagram stops being readable.
+
+If you find yourself drawing many actors exchanging messages, switch to a [sequence diagram](/diagrams/sequence/). If you find yourself modelling conditional state ("Cart" → "Address" → "Payment"), a [state diagram](/diagrams/state/) is usually clearer.
+
+## Cheat sheet
+
+```
+flowchart TD          # TD = top-down. LR = left-right. BT, RL also valid.
+  A[Square]           # text in [...] = rectangle
+  B(Round)            # in (...) = rounded
+  C{Diamond}          # in {...} = decision
+  D((Circle))         # in ((...)) = circle / start-end
+  A --> B             # solid arrow
+  A -.-> C            # dashed arrow
+  A ==> D             # thick arrow
+  B -- "label" --> C  # arrow with label
+```
+
+## Common mistakes
+
+1. **Forgetting the direction**. `flowchart TD` works. `flowchart` alone errors out.
+2. **Special characters in node labels**. Wrap labels with quotes if they contain `[` `]` `(` `)` `:` or punctuation: `A["With (parens)"]`.
+3. **Too many crossings**. If your arrows weave through each other, the answer is usually two simpler diagrams, not a bigger one.
+
+## Worked example
+
+The sample above models a typical login gate. Try the [live preview](/preview/) to add a "Forgot password?" branch from the login screen, and a "Sign up" branch that loops back to the dashboard once the new user is created. The exercise is small and quickly teaches you how arrow labels behave.

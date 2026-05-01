@@ -1,0 +1,107 @@
+---
+import '~/styles/base.css';
+import Header from '~/components/Header.astro';
+import Footer from '~/components/Footer.astro';
+import CookieBanner from '~/components/CookieBanner.astro';
+import {
+  SITE_NAME,
+  SITE_TITLE_SUFFIX,
+  SITE_DESCRIPTION,
+  SITE_URL,
+  SITE_LOCALE,
+  GSC_VERIFICATION,
+  GA4_MEASUREMENT_ID,
+} from '~/consts';
+
+export interface Props {
+  title?: string;
+  description?: string;
+  canonical?: string;
+  ogImage?: string;
+  noindex?: boolean;
+}
+
+const {
+  title,
+  description = SITE_DESCRIPTION,
+  canonical,
+  ogImage,
+  noindex = false,
+} = Astro.props;
+
+const pageTitle = title ? `${title} | ${SITE_NAME}` : SITE_TITLE_SUFFIX;
+const canonicalURL = new URL(canonical ?? Astro.url.pathname, Astro.site ?? SITE_URL);
+const ogImageURL = ogImage ? new URL(ogImage, Astro.site ?? SITE_URL).toString() : undefined;
+---
+
+<!DOCTYPE html>
+<html lang={SITE_LOCALE}>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="generator" content={Astro.generator} />
+    {noindex && <meta name="robots" content="noindex" />}
+    {GSC_VERIFICATION && (
+      <meta name="google-site-verification" content={GSC_VERIFICATION} />
+    )}
+
+    <title>{pageTitle}</title>
+    <meta name="description" content={description} />
+    <link rel="canonical" href={canonicalURL.toString()} />
+
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content={SITE_NAME} />
+    <meta property="og:title" content={pageTitle} />
+    <meta property="og:description" content={description} />
+    <meta property="og:url" content={canonicalURL.toString()} />
+    <meta property="og:locale" content="en_US" />
+    {ogImageURL && <meta property="og:image" content={ogImageURL} />}
+
+    <meta name="twitter:card" content={ogImageURL ? 'summary_large_image' : 'summary'} />
+    <meta name="twitter:title" content={pageTitle} />
+    <meta name="twitter:description" content={description} />
+    {ogImageURL && <meta name="twitter:image" content={ogImageURL} />}
+
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="sitemap" href="/sitemap-index.xml" />
+
+    {GA4_MEASUREMENT_ID && (
+      <script is:inline define:vars={{ ga: GA4_MEASUREMENT_ID }}>
+        (function () {
+          if (!ga) return;
+          try {
+            if (localStorage.getItem('cookie-consent') !== 'accepted') return;
+          } catch (e) { return; }
+          var s = document.createElement('script');
+          s.async = true;
+          s.src = 'https://www.googletagmanager.com/gtag/js?id=' + ga;
+          document.head.appendChild(s);
+          window.dataLayer = window.dataLayer || [];
+          function gtag(){ dataLayer.push(arguments); }
+          gtag('js', new Date());
+          gtag('config', ga, { anonymize_ip: true });
+        })();
+      </script>
+    )}
+
+    <script is:inline>
+      (function () {
+        try {
+          var saved = localStorage.getItem('theme');
+          var prefers = window.matchMedia('(prefers-color-scheme: dark)').matches;
+          var theme = saved || (prefers ? 'dark' : 'light');
+          document.documentElement.setAttribute('data-theme', theme);
+        } catch (e) {
+          document.documentElement.setAttribute('data-theme', 'light');
+        }
+      })();
+    </script>
+  </head>
+  <body>
+    <a href="#main" class="skip-link">Skip to content</a>
+    <Header />
+    <main id="main"><slot /></main>
+    <Footer />
+    {GA4_MEASUREMENT_ID && <CookieBanner />}
+  </body>
+</html>

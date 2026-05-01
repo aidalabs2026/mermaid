@@ -1,0 +1,53 @@
+---
+title: Gantt chart
+description: Project schedules with sections, durations, dependencies, and milestones. A solid choice for launch plans and roadmaps that have to fit on one slide.
+mermaidKeyword: gantt
+order: 6
+lastUpdated: 2026-05-01
+sampleCode: |
+  gantt
+    title Product launch
+    dateFormat YYYY-MM-DD
+    section Engineering
+    Auth refactor   :a1, 2026-05-01, 7d
+    Billing module  :a2, after a1, 10d
+    section Marketing
+    Landing page    :b1, 2026-05-04, 5d
+    Press kit       :b2, after b1, 3d
+    section Launch
+    Soft launch     :milestone, 2026-05-22, 0d
+    GA              :milestone, 2026-06-05, 0d
+---
+
+## When to reach for a gantt chart
+
+Gantt charts answer "**when** does each thing happen and what depends on what?". They work well for product launches, conference timelines, and any plan where readers care about durations and overlaps.
+
+For a sequence of automated steps with no calendar dimension, a [flowchart](/diagrams/flowchart/) is more appropriate.
+
+## Cheat sheet
+
+```
+gantt
+  title My plan
+  dateFormat YYYY-MM-DD
+  section Phase 1
+  Task A   :a1, 2026-05-01, 7d
+  Task B   :a2, after a1, 5d
+  Task C   :crit, a3, after a2, 3d
+  Milestone X :milestone, 2026-05-20, 0d
+```
+
+| Modifier | Meaning |
+|---|---|
+| `crit` | critical path style |
+| `done` | completed task style |
+| `active` | currently running |
+| `milestone` | zero-duration milestone |
+| `after a1` | starts after task `a1` |
+
+## Common mistakes
+
+1. **Using gantt for a 2-task project**. Two boxes side by side in a flowchart is more readable.
+2. **Ambiguous date format**. Always set `dateFormat YYYY-MM-DD` — Mermaid's defaults can surprise you.
+3. **Treating it as a Jira replacement**. Gantt charts visualise plans; they do not track them.

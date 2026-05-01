@@ -1,0 +1,42 @@
+---
+title: Pie chart
+description: Quick proportional charts. Best for two- or three-slice break-downs that fit in a slide.
+mermaidKeyword: pie
+order: 7
+lastUpdated: 2026-05-01
+sampleCode: |
+  pie title Traffic sources (last 30 days)
+    "Organic search" : 58
+    "Direct" : 17
+    "Referral" : 14
+    "Social" : 8
+    "Email" : 3
+---
+
+## When to reach for a pie chart
+
+Pie charts are good for **part-of-a-whole** stories: traffic sources, error categories, time spent in each phase. They lose their punch above six slices — a bar chart is usually better in that case, but Mermaid does not yet have native bar charts (you can use a [gantt-as-bar trick](/guides/) for some cases).
+
+## Cheat sheet
+
+```
+pie title My breakdown
+  "Slice A" : 60
+  "Slice B" : 30
+  "Slice C" : 10
+```
+
+Add `showData` after `pie` to print the raw values next to each label:
+
+```
+pie showData
+  title Errors by service
+  "auth" : 42
+  "billing" : 11
+  "search" : 4
+```
+
+## Common mistakes
+
+1. **Adding a slice for every category**. Group anything below 5% into "Other" to keep the chart readable.
+2. **Decimals**. Mermaid pie accepts decimals, but two decimal places of precision rarely helps the reader.

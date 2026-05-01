@@ -1,0 +1,49 @@
+---
+title: Why text-based diagrams beat drag-and-drop in a code base
+description: A short argument for keeping diagrams as text — version control, code review, fewer broken images, and faster iteration.
+category: strategy
+lastUpdated: 2026-05-01
+order: 1
+tags: ['diagrams-as-code', 'workflow']
+---
+
+Most software documentation eventually grows a diagram. The question is *how* you store it. The two camps are:
+
+- **Drag-and-drop tools** like draw.io, Lucidchart, or Excalidraw — you produce a binary file or a hosted SaaS link.
+- **Diagrams as code** like Mermaid, PlantUML, or Graphviz — you write a few lines of text and the tool renders it.
+
+Once a project grows past two or three contributors, the second camp wins almost every argument that comes up. Here is why.
+
+## 1. Diagrams live next to the code that explains them
+
+A Mermaid block in a `README.md` or an architecture decision record (ADR) is just text. It travels with the rest of the file, gets diffed in the same pull request, and is reviewable by the same humans. There is no second source of truth in a Confluence page that someone forgot to update.
+
+## 2. You don't need a license to edit one
+
+Drag-and-drop tools either lock the editable file behind a SaaS account or behind a desktop app. Diagrams as code can be edited by anyone with a text editor — including a junior who joined yesterday. The barrier to fixing a typo is roughly zero.
+
+## 3. Renderers are everywhere
+
+GitHub, GitLab, Bitbucket, Notion, Obsidian, GitBook, Hugo, Jekyll, Docusaurus, MkDocs, and most serious documentation tools all render Mermaid blocks natively. That means **the same source** appears correctly in every tool that opens it. With a hosted draw.io link, you depend on the host being alive.
+
+## 4. Version control diffs are usable
+
+A change to a Mermaid diagram looks like:
+
+```diff
+- A --> B
++ A --> B[New label]
++ B --> C
+```
+
+Reviewers can read that. A change to a `.drawio` binary looks like a 4&nbsp;KB blob diff that nobody opens.
+
+## 5. The trade-off is real
+
+Diagrams as code are not always better. They are worse when:
+
+- The diagram is mostly **freeform layout** (a marketing slide, a workshop whiteboard).
+- You need **pixel-perfect control** — Mermaid will choose its own layout, and you mostly cannot override it.
+- Your diagram is a one-off and you will never edit it again.
+
+For everything that lives in a code base and changes more than once, however, `flowchart TD` in a Markdown file is usually the right answer. Open the [live preview](/preview/) to try it on your next ADR.

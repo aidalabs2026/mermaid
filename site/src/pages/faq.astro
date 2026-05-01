@@ -1,0 +1,65 @@
+---
+import BaseLayout from '~/layouts/BaseLayout.astro';
+import { getCollection } from 'astro:content';
+import { SITE_NAME } from '~/consts';
+
+const allFaq = (await getCollection('faq'))
+  .sort((a, b) => (a.data.order ?? 999) - (b.data.order ?? 999));
+
+const grouped = allFaq.reduce<Record<string, typeof allFaq>>((acc, item) => {
+  const cat = item.data.category;
+  acc[cat] = acc[cat] ?? [];
+  acc[cat].push(item);
+  return acc;
+}, {});
+
+const categoryLabels: Record<string, string> = {
+  'using-the-tool': 'Using the tool',
+  privacy: 'Privacy',
+  limits: 'Limits',
+  formats: 'Diagram formats',
+  ads: 'Ads',
+};
+
+const faqJsonLd = {
+  '@context': 'https://schema.org',
+  '@type': 'FAQPage',
+  mainEntity: allFaq.map((item) => ({
+    '@type': 'Question',
+    name: item.data.question,
+    acceptedAnswer: {
+      '@type': 'Answer',
+      text: item.body ?? '',
+    },
+  })),
+};
+---
+
+<BaseLayout
+  title="FAQ"
+  description={`Frequently asked questions about ${SITE_NAME} — privacy, supported diagram types, limits, ads, and more.`}
+>
+  <article class="prose">
+    <h1>FAQ</h1>
+    <p>
+      Frequently asked questions, grouped by topic. Don't see your question?
+      Send it via the <a href="/contact/">contact form</a>.
+    </p>
+
+    {Object.entries(grouped).map(([cat, items]) => (
+      <section>
+        <h2>{categoryLabels[cat] ?? cat}</h2>
+        <dl>
+          {items.map((item) => (
+            <>
+              <dt><strong>{item.data.question}</strong></dt>
+              <dd set:html={item.rendered?.html ?? ''} />
+            </>
+          ))}
+        </dl>
+      </section>
+    ))}
+
+    <script type="application/ld+json" set:html={JSON.stringify(faqJsonLd)} />
+  </article>
+</BaseLayout>

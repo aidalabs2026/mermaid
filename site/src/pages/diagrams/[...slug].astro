@@ -1,0 +1,61 @@
+---
+import BaseLayout from '~/layouts/BaseLayout.astro';
+import { getCollection, render } from 'astro:content';
+import { SITE_NAME, SITE_URL } from '~/consts';
+import LZString from 'lz-string';
+
+export async function getStaticPaths() {
+  const all = await getCollection('diagrams');
+  return all.map((entry) => ({
+    params: { slug: entry.id },
+    props: { entry },
+  }));
+}
+
+const { entry } = Astro.props;
+const { Content } = await render(entry);
+
+const compressed = LZString.compressToEncodedURIComponent(entry.data.sampleCode);
+const tryItUrl = `/preview/#code=${compressed}`;
+
+const articleJsonLd = {
+  '@context': 'https://schema.org',
+  '@type': 'Article',
+  headline: entry.data.title,
+  description: entry.data.description,
+  datePublished: entry.data.lastUpdated.toISOString(),
+  dateModified: entry.data.lastUpdated.toISOString(),
+  author: { '@type': 'Organization', name: SITE_NAME },
+  publisher: { '@type': 'Organization', name: SITE_NAME, url: SITE_URL + '/' },
+  mainEntityOfPage: SITE_URL + `/diagrams/${entry.id}/`,
+};
+---
+
+<BaseLayout
+  title={entry.data.title}
+  description={entry.data.description}
+>
+  <article class="prose">
+    <p><a href="/diagrams/">← All diagram types</a></p>
+    <h1>{entry.data.title}</h1>
+    <p><em>Mermaid keyword: <code>{entry.data.mermaidKeyword}</code></em></p>
+
+    <p style="margin: 1rem 0;">
+      <a class="btn btn-primary" href={tryItUrl}>Try this in the preview →</a>
+    </p>
+
+    <h2>Sample</h2>
+    <pre><code>{entry.data.sampleCode}</code></pre>
+
+    <Content />
+
+    <hr />
+    <p>
+      <a href="/preview/">Open the live preview</a> ·
+      <a href="/diagrams/">Browse all diagram types</a> ·
+      <a href="/guides/">Read the guides</a>
+    </p>
+
+    <script type="application/ld+json" set:html={JSON.stringify(articleJsonLd)} />
+  </article>
+</BaseLayout>

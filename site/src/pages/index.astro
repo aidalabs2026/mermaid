@@ -1,0 +1,143 @@
+---
+import BaseLayout from '~/layouts/BaseLayout.astro';
+import { SITE_NAME, SITE_URL, SITE_DESCRIPTION } from '~/consts';
+
+const diagramTypes = [
+  { slug: 'flowchart', label: 'Flowchart', desc: 'Boxes and arrows for processes, decisions, and pipelines.' },
+  { slug: 'sequence', label: 'Sequence', desc: 'Time-ordered messages between actors and services.' },
+  { slug: 'class', label: 'Class', desc: 'Object-oriented classes, attributes, and relationships.' },
+  { slug: 'state', label: 'State', desc: 'State machines, UI flows, and lifecycle transitions.' },
+  { slug: 'er', label: 'ER', desc: 'Entity-relationship diagrams for database schemas.' },
+  { slug: 'gantt', label: 'Gantt', desc: 'Timelines with sections, dependencies, and milestones.' },
+  { slug: 'pie', label: 'Pie', desc: 'Quick proportional charts.' },
+  { slug: 'mindmap', label: 'Mindmap', desc: 'Hierarchical idea maps and brainstorms.' },
+];
+
+const siteJsonLd = {
+  '@context': 'https://schema.org',
+  '@type': 'WebSite',
+  name: SITE_NAME,
+  url: SITE_URL + '/',
+  description: SITE_DESCRIPTION,
+  inLanguage: 'en',
+  publisher: {
+    '@type': 'Organization',
+    name: SITE_NAME,
+    url: SITE_URL + '/',
+  },
+};
+
+const orgJsonLd = {
+  '@context': 'https://schema.org',
+  '@type': 'Organization',
+  name: SITE_NAME,
+  url: SITE_URL + '/',
+  description: SITE_DESCRIPTION,
+};
+---
+
+<BaseLayout
+  title="Render Mermaid Diagrams in Your Browser"
+  description="Paste Mermaid syntax and see a clean SVG instantly. Flowchart, sequence, class, state, ER, gantt, pie, mindmap and more — all rendered locally. Your diagram never leaves your device."
+>
+  <section class="hero container">
+    <span class="privacy-badge" aria-label="Privacy">
+      🔒 Your diagram never leaves your browser
+    </span>
+    <h1>Mermaid, rendered instantly. Diagrams as code, kept private.</h1>
+    <p class="tagline">
+      Paste Mermaid syntax and watch the SVG appear as you type. Export PNG or
+      SVG, copy a shareable URL, or learn the syntax for any of the eleven
+      diagram types — without leaving the browser.
+    </p>
+    <div class="cta-row">
+      <a class="btn btn-primary" href="/preview/">Open the preview</a>
+      <a class="btn" href="/diagrams/">Browse diagram types</a>
+    </div>
+  </section>
+
+  <section class="container">
+    <h2 class="section-h">Pick a diagram type</h2>
+    <div class="card-grid types-grid">
+      {diagramTypes.map((d) => (
+        <a class="card type-card" href={`/diagrams/${d.slug}/`}>
+          <h3>{d.label}</h3>
+          <p>{d.desc}</p>
+          <span class="card-arrow">Learn →</span>
+        </a>
+      ))}
+    </div>
+    <p class="section-more">
+      <a href="/diagrams/">All eight types</a> ·
+      <a href="/preview/">Live preview tool</a>
+    </p>
+  </section>
+
+  <section class="container">
+    <div class="card-grid reason-grid">
+      <article class="card">
+        <h3>Fast, static-first</h3>
+        <p>Astro static site. Mermaid.js loads only when you open the preview tool, so the rest of the site stays light.</p>
+      </article>
+      <article class="card">
+        <h3>Private by design</h3>
+        <p>Rendering happens in your browser. We never receive your diagram source — not even for share URLs (we use the URL fragment).</p>
+      </article>
+      <article class="card">
+        <h3>More than a tool</h3>
+        <p>Each diagram type ships with a guide, a cheat sheet, and worked examples so you can learn while you sketch.</p>
+      </article>
+      <article class="card">
+        <h3>Strict-mode rendering</h3>
+        <p>Mermaid runs with <code>securityLevel: 'strict'</code>. Even pasted snippets that try to inject scripts are sanitised.</p>
+      </article>
+    </div>
+  </section>
+
+  <section class="container">
+    <h2 class="section-h">Why text-based diagrams</h2>
+    <p style="max-width: 720px; margin: 0 auto; color: var(--color-text-muted); text-align: center;">
+      Diagrams as code live in pull requests, render automatically in GitHub
+      READMEs, and diff cleanly when you change them. They are versioned, they
+      survive a laptop crash, and they take seconds to share. Mermaid Preview
+      is the workshop where you draft, debug, and export those diagrams.
+    </p>
+  </section>
+
+  <script type="application/ld+json" set:html={JSON.stringify(siteJsonLd)} />
+  <script type="application/ld+json" set:html={JSON.stringify(orgJsonLd)} />
+
+  <style>
+    .section-h {
+      text-align: center;
+      margin: 2.5rem 0 1rem;
+      font-size: 1.6rem;
+    }
+    .type-card {
+      display: block;
+      text-decoration: none;
+      color: inherit;
+      transition: border-color 0.12s, transform 0.12s;
+    }
+    .type-card:hover {
+      border-color: var(--color-accent);
+      transform: translateY(-1px);
+      text-decoration: none;
+    }
+    .types-grid { grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); }
+    .type-card h3 { font-size: 1.15rem; margin-bottom: 0.4rem; }
+    .reason-grid { margin-top: 1.5rem; }
+    .card-arrow {
+      color: var(--color-accent);
+      font-weight: 600;
+      font-size: 0.9rem;
+    }
+    .section-more {
+      text-align: center;
+      font-size: 0.95rem;
+      color: var(--color-text-muted);
+      margin-top: 1rem;
+    }
+    .section-more a { margin: 0 0.35rem; }
+  </style>
+</BaseLayout>

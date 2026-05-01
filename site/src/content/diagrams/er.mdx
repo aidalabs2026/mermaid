@@ -1,0 +1,57 @@
+---
+title: ER diagram
+description: Entity-relationship diagrams for database schemas. Shows tables, foreign keys, and cardinality at a glance.
+mermaidKeyword: erDiagram
+order: 5
+lastUpdated: 2026-05-01
+sampleCode: |
+  erDiagram
+    USER ||--o{ POST : writes
+    USER ||--o{ COMMENT : writes
+    POST ||--o{ COMMENT : has
+    POST }o--|| CATEGORY : belongs_to
+    USER {
+      int id PK
+      string email
+      string display_name
+    }
+    POST {
+      int id PK
+      string title
+      string body
+      int author_id FK
+      int category_id FK
+    }
+---
+
+## When to reach for an ER diagram
+
+ER diagrams are made for **database schemas**: tables, columns, primary keys, foreign keys, and the cardinality of relationships. If the audience needs to understand "one user has many posts" or "every comment must belong to a post", an ER diagram says it on one screen.
+
+For object-graph relationships in code (where types share inheritance), use a [class diagram](/diagrams/class/) instead.
+
+## Cheat sheet
+
+```
+erDiagram
+  A ||--o{ B : "has"   # A has many optional B
+  A ||--|{ B : "has"   # A has one or more B (mandatory)
+  A }|--|| B : "owned by"  # many A owned by exactly one B
+  A {
+    int id PK
+    string name
+    int b_id FK
+  }
+```
+
+| Notation | Meaning |
+|---|---|
+| `\|\|` | exactly one |
+| `o\|` | zero or one |
+| `\|{` | one or more |
+| `o{` | zero or more |
+
+## Common mistakes
+
+1. **Forgetting `PK` / `FK` markers**. Without them the diagram is just a list of column names. Mark keys explicitly.
+2. **Listing every column**. ER diagrams are most useful with the columns that matter to the relationship — usually the keys plus one or two human-readable fields.

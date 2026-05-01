@@ -1,0 +1,69 @@
+---
+import BaseLayout from '~/layouts/BaseLayout.astro';
+import { getCollection, render } from 'astro:content';
+import { SITE_NAME, SITE_URL } from '~/consts';
+
+export async function getStaticPaths() {
+  const all = await getCollection('glossary');
+  return all.map((entry) => ({
+    params: { slug: entry.id },
+    props: { entry, allEntries: all },
+  }));
+}
+
+const { entry, allEntries } = Astro.props;
+const { Content } = await render(entry);
+
+const related = (entry.data.related ?? [])
+  .map((slug) => allEntries.find((e) => e.id === slug))
+  .filter((e): e is NonNullable<typeof e> => e !== undefined);
+
+const articleJsonLd = {
+  '@context': 'https://schema.org',
+  '@type': 'DefinedTerm',
+  name: entry.data.title,
+  description: entry.data.description,
+  inDefinedTermSet: {
+    '@type': 'DefinedTermSet',
+    name: `${SITE_NAME} Glossary`,
+    url: SITE_URL + '/glossary/',
+  },
+};
+---
+
+<BaseLayout
+  title={entry.data.title}
+  description={entry.data.description}
+>
+  <article class="prose">
+    <p><a href="/glossary/">← All glossary entries</a></p>
+    <h1>{entry.data.title}</h1>
+    <p><em>Last updated: {entry.data.lastUpdated.toISOString().slice(0, 10)}</em></p>
+
+    <Content />
+
+    {related.length > 0 && (
+      <>
+        <hr />
+        <h2>Related</h2>
+        <ul>
+          {related.map((r) => (
+            <li>
+              <a href={`/glossary/${r.id}/`}><strong>{r.data.title}</strong></a> —
+              {' '}{r.data.description}
+            </li>
+          ))}
+        </ul>
+      </>
+    )}
+
+    <hr />
+    <p>
+      <a href="/preview/">Open the live preview</a> ·
+      <a href="/diagrams/">Diagram types</a> ·
+      <a href="/guides/">Guides</a>
+    </p>
+
+    <script type="application/ld+json" set:html={JSON.stringify(articleJsonLd)} />
+  </article>
+</BaseLayout>

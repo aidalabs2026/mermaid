@@ -1,0 +1,82 @@
+---
+title: Mermaid theme customisation
+description: The four built-in themes, how to switch between them, and how to push past the defaults with theme variables when the built-ins are not quite right.
+category: format-guide
+lastUpdated: 2026-05-01
+order: 6
+tags: ['theme', 'styling', 'dark-mode']
+---
+
+Mermaid ships with four themes — `default`, `dark`, `forest`, and `neutral`. They cover most needs, and most projects should pick one and stick with it. But sometimes you need a slight tweak — a brand colour on the primary node, slightly larger fonts, a softer background — and Mermaid has a way to do that without a custom CSS file.
+
+## Picking a built-in theme
+
+The four built-ins look distinct enough that most people can pick by eye. Quick guide:
+
+- **`default`** — light background, blue accents. Reads well on light docs and the default GitHub theme.
+- **`dark`** — dark background, lighter strokes. Reads well in dark documentation systems and on slides projected in a dim room.
+- **`forest`** — green-tinted, lower contrast. Useful when you want diagrams to recede a little so the surrounding prose stands out.
+- **`neutral`** — black-and-white only. The right pick for print, e-readers, and any situation where colour might be lost.
+
+In [our preview](/preview/), the theme dropdown lets you flip between all four without re-typing the diagram. Once you commit, you can lock the theme into the source itself with a directive (next section).
+
+## Locking a theme into the diagram source
+
+Add a `%%{init: ...}%%` directive at the very top of the diagram, before the first keyword:
+
+```
+%%{init: {'theme': 'dark'}}%%
+flowchart TD
+  A --> B
+```
+
+That makes the theme part of the diagram. Wherever it renders — Notion, GitHub, your own static site — the theme follows. This is especially useful for **dark documentation systems** that wrap your light-themed diagrams in a dark page; locking `theme: 'dark'` keeps the diagram readable.
+
+If you don't want to lock the theme, leave the directive out and let the renderer pick. GitHub will pick based on the visitor's GitHub theme, Notion will pick based on workspace theme, and so on.
+
+## Theme variables — a small change without a custom theme
+
+Sometimes you want one colour different. The `themeVariables` block lets you override individual variables without redefining the whole theme:
+
+```
+%%{init: {
+  'theme': 'default',
+  'themeVariables': {
+    'primaryColor': '#fff7ed',
+    'primaryBorderColor': '#fb923c',
+    'primaryTextColor': '#9a3412'
+  }
+}}%%
+flowchart LR
+  A[Primary] --> B[Secondary]
+```
+
+Useful variables, in rough order of how often you'll touch them:
+
+| Variable | What it controls |
+|---|---|
+| `primaryColor` | Fill of the most prominent node type |
+| `primaryBorderColor` | Border of primary nodes |
+| `primaryTextColor` | Text inside primary nodes |
+| `lineColor` | Edge / connector colour |
+| `background` | Page background of the rendered SVG |
+| `mainBkg` | Background fill behind the diagram |
+| `secondaryColor` | Secondary node fill |
+| `tertiaryColor` | Tertiary node fill |
+| `fontFamily` | Font for all text |
+
+The full list is documented at <a href="https://mermaid.js.org/config/theming.html" rel="nofollow noopener">mermaid.js.org/config/theming.html</a>.
+
+## When to write a fully custom theme
+
+Probably never. Maintaining a custom theme means owning Mermaid version drift — when v12 ships, your theme variables may move or get renamed. Most of the time, you actually want one of:
+
+- A theme variable override (above) for one or two colours.
+- A wrapper `<div>` with CSS that styles the SVG from outside (works because Mermaid SVGs use semantic class names like `.node`, `.edgePath`).
+- Two diagrams, one with `theme: 'default'` and one with `theme: 'dark'`, and a CSS rule that hides whichever doesn't match the page theme. Heavyweight, but bulletproof.
+
+## Common mistakes
+
+1. **Setting `theme` after the keyword.** The directive must come **before** the diagram type keyword. Putting it on a later line silently does nothing.
+2. **Mixing `themeCSS` and `themeVariables`.** They are two different escape hatches. Use one or the other; mixing them produces hard-to-debug overrides.
+3. **Forgetting `securityLevel`.** Your hosted site should set `securityLevel: 'strict'` next to `theme`, or you have an XSS hole open. See our [glossary entry](/glossary/security-level/).

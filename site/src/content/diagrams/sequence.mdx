@@ -1,0 +1,55 @@
+---
+title: Sequence diagram
+description: Time-ordered messages between actors and services. The right tool for API request flows, retries, and asynchronous handoffs.
+mermaidKeyword: sequenceDiagram
+order: 2
+lastUpdated: 2026-05-01
+sampleCode: |
+  sequenceDiagram
+    participant U as User
+    participant W as Web App
+    participant A as Auth Service
+    participant D as Database
+    U->>W: Submit login form
+    W->>A: POST /token
+    A->>D: SELECT user by email
+    D-->>A: user row
+    A-->>W: { access_token }
+    W-->>U: redirect /dashboard
+---
+
+## When to reach for a sequence diagram
+
+Sequence diagrams are great when **timing and order matter** — for example, an HTTP request that crosses three services, an OAuth dance, or a webhook retry policy. If your audience asks "what happens first?", reach for a sequence.
+
+If your story is about *state* rather than *messages*, use a [state diagram](/diagrams/state/). If timing does not matter, a [flowchart](/diagrams/flowchart/) is usually shorter.
+
+## Cheat sheet
+
+```
+sequenceDiagram
+  participant A as Alice           # alias "A", display "Alice"
+  actor B as Bob                   # use "actor" for human-shaped icon
+  A->>B: Solid arrow with label    # synchronous send
+  A-->>B: Dashed arrow             # response / async reply
+  A-xB: Failed message             # X-marked tip
+  Note over A,B: side annotation
+  loop every minute
+    A->>B: ping
+  end
+  alt success
+    A->>B: ok
+  else failure
+    A->>B: retry
+  end
+```
+
+## Common mistakes
+
+1. **Mixing arrows mid-sequence**. Pick a convention (e.g. `->>` for request, `-->>` for response) and stick with it.
+2. **Too many participants**. Five is usually the upper bound before the diagram becomes unreadable. Split into two diagrams or collapse helpers.
+3. **Annotating timing in labels**. If you need explicit duration, that's a [gantt chart](/diagrams/gantt/), not a sequence diagram.
+
+## Worked example
+
+The sample above is a textbook OAuth-style login flow. Try editing it in the [live preview](/preview/) to add a `loop` that retries the database call up to three times, or an `alt` block that shows what happens when the password is wrong.

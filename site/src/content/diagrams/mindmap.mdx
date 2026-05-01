@@ -1,0 +1,48 @@
+---
+title: Mindmap
+description: Hierarchical idea maps. Useful for brainstorms, scope summaries, and any tree-shaped notes that need to live in a Markdown file.
+mermaidKeyword: mindmap
+order: 8
+lastUpdated: 2026-05-01
+sampleCode: |
+  mindmap
+    root((Launch))
+      Engineering
+        Auth
+        Billing
+        Logging
+      Marketing
+        Landing page
+        Press kit
+      Support
+        Help center
+        Status page
+      Compliance
+        Privacy
+        Terms
+---
+
+## When to reach for a mindmap
+
+Mindmaps are best when you want to capture a **tree of ideas** without committing to ordering or causality — brainstorms, project outlines, or feature breakdowns. They are not the right tool for processes, time-ordered events, or relationships between entities.
+
+For trees with explicit "parent → child" semantics in code (DOM trees, file systems), a [flowchart](/diagrams/flowchart/) with `LR` direction is often more compact.
+
+## Cheat sheet
+
+```
+mindmap
+  root((Center))     # double parens = circle
+    Branch1
+      Leaf1
+      Leaf2
+    Branch2[Square]  # square node shape
+      ::icon(fa fa-rocket)   # FontAwesome icon (in supporting renderers)
+```
+
+Indentation defines hierarchy. Two spaces per level is the convention.
+
+## Common mistakes
+
+1. **Mixing notation styles inside one mindmap**. Stick to `node` or `node[Square]`, not both.
+2. **Going more than three levels deep**. Mindmaps lose their punch beyond depth 3 — break large mindmaps into multiple top-level diagrams.

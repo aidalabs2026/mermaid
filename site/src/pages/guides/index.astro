@@ -1,0 +1,40 @@
+---
+import BaseLayout from '~/layouts/BaseLayout.astro';
+import { getCollection } from 'astro:content';
+import { SITE_NAME } from '~/consts';
+
+const all = (await getCollection('guides', ({ data }) => data.draft !== true))
+  .sort((a, b) => {
+    const orderA = a.data.order ?? 999;
+    const orderB = b.data.order ?? 999;
+    if (orderA !== orderB) return orderA - orderB;
+    return a.data.title.localeCompare(b.data.title);
+  });
+---
+
+<BaseLayout
+  title="Guides"
+  description={`Guides for diagrams-as-code workflows with Mermaid — embedding, theming, troubleshooting, comparisons, and code-review tactics.`}
+>
+  <article class="prose">
+    <h1>Guides</h1>
+    <p>
+      Short reads on getting the most out of {SITE_NAME} and Mermaid in
+      general. We add new guides as we hit interesting questions in real
+      projects, not on a content schedule.
+    </p>
+
+    <ul>
+      {all.map((g) => (
+        <li>
+          <a href={`/guides/${g.id}/`}><strong>{g.data.title}</strong></a> —
+          {' '}{g.data.description}
+        </li>
+      ))}
+    </ul>
+
+    {all.length === 0 && (
+      <p><em>No guides published yet — check back soon.</em></p>
+    )}
+  </article>
+</BaseLayout>

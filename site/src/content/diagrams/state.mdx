@@ -1,0 +1,43 @@
+---
+title: State diagram
+description: State machines, UI flows, and lifecycle transitions. The right diagram when the same noun has multiple states with rules about how to move between them.
+mermaidKeyword: stateDiagram-v2
+order: 4
+lastUpdated: 2026-05-01
+sampleCode: |
+  stateDiagram-v2
+    [*] --> Cart
+    Cart --> Address: continue
+    Address --> Payment: continue
+    Payment --> Review: continue
+    Review --> Placing: confirm
+    Placing --> Placed: success
+    Placing --> Payment: payment failed
+    Placed --> [*]
+---
+
+## When to reach for a state diagram
+
+When the same entity (an order, a user session, a deploy) has a small set of well-defined states and rules about how to move between them, a state diagram beats a flowchart. The diagram **enumerates** the legal transitions so you can spot the missing one.
+
+## Cheat sheet
+
+```
+stateDiagram-v2
+  [*] --> Idle
+  Idle --> Working : start
+  Working --> Idle : cancel
+  Working --> Done : finish
+  state Working {
+    [*] --> Step1
+    Step1 --> Step2
+    Step2 --> [*]
+  }
+  Done --> [*]
+```
+
+## Common mistakes
+
+1. **Using a state diagram when you really mean a flowchart**. If the diagram has only one path through it, prefer a flowchart.
+2. **Missing terminal arrows**. A "stuck" state (no outgoing transitions) is usually a bug in the design — make it explicit with `--> [*]` or rethink.
+3. **Hidden guard conditions**. Mermaid does not have a rich syntax for guards. Add the condition to the transition label: `Working --> Failed : retry-count > 3`.

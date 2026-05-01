@@ -1,0 +1,120 @@
+---
+title: A Mermaid syntax style guide
+description: Conventions for naming, indentation, comments, and line lengths that keep your team's Mermaid diagrams reviewable in a pull request and pleasant to edit a year later.
+category: basics
+lastUpdated: 2026-05-01
+order: 8
+tags: ['style', 'conventions', 'team']
+---
+
+Mermaid does not enforce a style. Your team should. Diagrams written by ten people without a shared style end up looking like ten different diagrams stitched together — which is fine for one repo, painful for thirty.
+
+This is the style guide we use, formed from a few years of Mermaid in production documentation. Borrow it, fork it, or replace it with your own. The point is having one.
+
+## 1. Node IDs
+
+- **Use short, lowercase IDs**: `auth`, `db`, `cache`. Not `AuthService` or `auth_service_singleton_v2`.
+- **Reserve `_` for compound IDs**: `auth_admin`, `cache_redis`. Avoid hyphens; Mermaid is happier with underscores.
+- **Numbers go at the end**, never in the middle: `step1`, `step2`, not `s1step`.
+- **Don't reuse IDs across diagrams in the same file** if it can be avoided. Even though Mermaid scopes them, it makes search harder.
+
+## 2. Labels
+
+- **Sentence case for labels**: `Validate input`, not `validate input` or `VALIDATE INPUT`.
+- **No trailing punctuation**: a flowchart node is not a sentence.
+- **Quote labels with special characters**: `A["Read /etc/hosts"]`, `B["Cost: $50"]`. We have a [troubleshooting note](/guides/common-parse-errors-and-fixes/) on which characters require this.
+
+## 3. Direction
+
+- **Default to `TD` (top-down) for procedural flows**, `LR` (left-right) for pipelines and architecture overviews.
+- **Pick one direction per diagram.** If you find yourself wanting `TD` for the top half and `LR` for the bottom, you have two diagrams.
+
+## 4. Comments
+
+Mermaid comments use `%%`:
+
+```
+flowchart TD
+  %% Public flow — visitors hit this without auth
+  Home --> Pricing
+  Pricing --> Signup
+  %% Private flow — requires session cookie
+  Signup --> Dashboard
+```
+
+- Use comments for **section headers** in long diagrams.
+- Don't use them to disable nodes during editing — delete and re-paste; comments above a node tend to get orphaned.
+
+## 5. Indentation
+
+- **Two spaces** under the diagram-type line. Not tabs.
+- **No deeper indentation** for sub-sections; Mermaid is line-based, not tree-based, so deeper indentation just adds visual noise.
+- **Blank lines between logical sections** are encouraged in long diagrams.
+
+## 6. Line lengths
+
+Long edge definitions hurt readability. Two patterns help:
+
+**Pattern A — split into smaller diagrams** when one diagram crosses 30 lines.
+
+**Pattern B — break long edges with intermediate nodes**:
+
+```
+%% Hard to read
+A -- "validates and forwards to" --> B
+
+%% Easier
+A --> Validator
+Validator --> B
+```
+
+The intermediate node names what is happening, which is often the point of the diagram in the first place.
+
+## 7. Sequence diagrams
+
+- **Order participants left-to-right by role**, not alphabetically: User, Frontend, Backend, Database. The diagram reads like the request flows.
+- **Use aliases for short names**: `participant U as User`. Even short names crowd the lifeline label.
+- **Group related calls in `loop`, `alt`, `opt` blocks**. Don't simulate them with comments.
+
+## 8. Class and ER diagrams
+
+- **Show only the fields that matter** to the audience. A class diagram is not the source of truth for fields; the code is. Show the 3–5 fields that explain the relationship.
+- **List PK/FK explicitly** in ER diagrams. Without them, the diagram is just a list of column names.
+
+## 9. State diagrams
+
+- **Always include `[*]`** as both the entry and exit. A state machine without termination usually means there is a state you forgot.
+- **Label transitions with the trigger**, not the destination: `Working --> Done : finish`, not `Working --> Done : Done`.
+
+## 10. Theming
+
+- **Pick the team's theme once and lock it** with a `%%{init}%%` directive at the top of every diagram. Mixing themes across a docs site looks unprofessional.
+- **Don't override colours per node** unless one node is genuinely special (the "you are here" indicator on a path, for example).
+
+## Putting it together
+
+A diagram that follows the rules above:
+
+```
+%%{init: {'theme': 'default'}}%%
+flowchart TD
+  %% Public path — no auth required
+  Home --> Pricing
+  Pricing --> Signup
+
+  %% Authenticated path
+  Signup --> Verify
+  Verify --> Dashboard
+```
+
+Compare with the same diagram written without the rules:
+
+```
+flowchart
+  HOME --> Pricing_Page
+  Pricing_Page --> SIGNUP_FORM
+  SIGNUP_FORM --> verify_email_send
+  verify_email_send --> DASHBOARD_v2
+```
+
+Both render. The first one survives a pull request review six months later.

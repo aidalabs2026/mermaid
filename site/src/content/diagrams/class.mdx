@@ -1,0 +1,55 @@
+---
+title: Class diagram
+description: Object-oriented classes, attributes, and relationships. Useful for domain models, library overviews, and onboarding new engineers.
+mermaidKeyword: classDiagram
+order: 3
+lastUpdated: 2026-05-01
+sampleCode: |
+  classDiagram
+    class Customer {
+      +int id
+      +string email
+      +list~Order~ orders
+      +placeOrder(items) Order
+    }
+    class Order {
+      +int id
+      +Date placedAt
+      +string status
+      +addItem(item)
+    }
+    class LineItem {
+      +int qty
+      +Money unitPrice
+    }
+    Customer "1" --> "*" Order : has
+    Order "1" --> "*" LineItem : contains
+---
+
+## When to reach for a class diagram
+
+Class diagrams are ideal for **domain models**: showing entities, their fields, and how they relate. They double as a fast onboarding tool ("here are the five core types you'll encounter in this codebase") and as a precise way to specify a library's public surface.
+
+For a single function's call graph, a [flowchart](/diagrams/flowchart/) is usually clearer. For database schemas with foreign keys and cardinality, prefer an [ER diagram](/diagrams/er/).
+
+## Cheat sheet
+
+```
+classDiagram
+  class Animal {
+    +string name
+    +int age
+    +eat() void
+  }
+  class Dog
+  Animal <|-- Dog                  # inheritance
+  Owner "1" --> "*" Dog : owns     # association with cardinality
+  Engine *-- Car                    # composition (filled diamond)
+  Wheel o-- Car                     # aggregation (open diamond)
+```
+
+## Common mistakes
+
+1. **Listing every field**. Class diagrams are not exhaustive specs. Show the 3–5 fields that matter to the audience.
+2. **Mixing visibility prefixes**. `+`, `-`, `#`, `~` mean public/private/protected/package. Pick the ones your team uses.
+3. **Drawing classes that are really states**. If "Pending", "Shipped", "Delivered" are showing up as classes, you want a [state diagram](/diagrams/state/).

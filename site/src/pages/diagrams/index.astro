@@ -1,0 +1,36 @@
+---
+import BaseLayout from '~/layouts/BaseLayout.astro';
+import { getCollection } from 'astro:content';
+import { SITE_NAME } from '~/consts';
+
+const all = (await getCollection('diagrams'))
+  .sort((a, b) => (a.data.order ?? 999) - (b.data.order ?? 999));
+---
+
+<BaseLayout
+  title="Diagram types"
+  description={`The eight Mermaid diagram types covered by ${SITE_NAME} — flowchart, sequence, class, state, ER, gantt, pie, mindmap. Each comes with a guide and a one-click sample.`}
+>
+  <article class="prose">
+    <h1>Diagram types</h1>
+    <p>
+      Mermaid supports eleven diagram types in version 11. We cover the eight
+      most common here, each with its own landing page, cheat sheet, and
+      one-click sample you can drop into the preview tool.
+    </p>
+
+    <ul>
+      {all.map((d) => (
+        <li>
+          <a href={`/diagrams/${d.id}/`}><strong>{d.data.title}</strong></a> —
+          {' '}{d.data.description}
+        </li>
+      ))}
+    </ul>
+
+    <p>
+      Want to try without reading? Open the <a href="/preview/">live preview</a>
+      and pick an example from the dropdown.
+    </p>
+  </article>
+</BaseLayout>

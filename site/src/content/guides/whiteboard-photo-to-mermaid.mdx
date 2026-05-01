@@ -1,0 +1,84 @@
+---
+title: From whiteboard photo to Mermaid diagram
+description: A pragmatic workflow for converting that photo of a whiteboard into a Mermaid diagram you can actually maintain — without redrawing it five times.
+category: strategy
+lastUpdated: 2026-05-01
+order: 9
+tags: ['workflow', 'whiteboard', 'documentation']
+---
+
+Every team has a folder somewhere full of phone-camera photos of whiteboards. They captured a great architecture sketch in twenty seconds, and now they live forever — un-editable, un-searchable, mostly forgotten. Turning those photos into Mermaid diagrams is one of the highest-leverage documentation tasks available, but it has to be done in a way that takes minutes, not afternoons. Here is a workflow that has worked for us.
+
+## Step 0 — Decide if it is worth converting
+
+Whiteboard photos that survive longer than a week usually fall into three categories:
+
+1. **Decision diagrams** — capture the alternatives considered. These are gold; convert them.
+2. **Architecture sketches** — current state of the system. Convert if the system will exist for another six months.
+3. **Brainstorm clouds** — bubbles connected by arrows in seven directions. **Don't** convert these. The right output is a one-paragraph summary, not a structured diagram.
+
+Roughly two thirds of whiteboard photos fall into the third category. Be ruthless.
+
+## Step 1 — Walk it back to a list
+
+Open the photo. Without thinking about diagrams, write down what you see as a flat list:
+
+```
+- User opens app
+- Hits API
+- API checks cache
+- Cache miss → DB
+- DB returns row → cache → API → user
+```
+
+The list is dramatically more compact than the photo. If you cannot list it in under twelve bullets, the diagram on the board was probably overloaded; split it into multiple diagrams **before** converting any of them.
+
+## Step 2 — Identify the type
+
+From the list, pick the diagram type:
+
+- Mostly **steps with branches** → flowchart
+- Mostly **calls between named services** → sequence diagram
+- Mostly **states one thing moves through** → state diagram
+- Mostly **entities with relationships** → ER diagram
+
+If two types fit, prefer the one that requires the fewest nodes to communicate the point. We have a [decision guide](/guides/flowchart-vs-sequence-when/) for the most common pair.
+
+## Step 3 — Sketch in the preview
+
+Open [the live preview](/preview/) and start typing. Two reasons to do this in the preview rather than directly in your docs:
+
+1. The render is instant, so you see typos immediately.
+2. You can copy a share URL when you are 80% done and ask the original whiteboard author if it matches their intent. URL fragment encoding means the share link works even on Slack messages.
+
+Keep the first version **smaller than you think it should be**. Photos contain side notes, alternative paths, and annotations like "?" and "TODO" — these are usually conversational artefacts that don't belong in the final diagram.
+
+## Step 4 — Add structure, not detail
+
+Once the basic shape renders, resist the urge to add every box from the photo. Instead, ask three questions:
+
+1. **What's the title?** Add a header comment. `%% Order placement flow — current state, 2026-05`.
+2. **What is the entry point?** Make it visually distinct (rounded edges, a stadium shape, or a clear `Start` label).
+3. **What are the terminal states?** A flow without a clear end usually means a missing case.
+
+Adding these three things turns a literal transcription into something documentation-grade.
+
+## Step 5 — Commit, don't perfect
+
+Push the Mermaid source into your docs and stop. The temptation to keep iterating is strong, but the marginal value drops fast after the structural pass. A 70%-perfect diagram that lives in the README beats a 95%-perfect diagram that lives in your local notes folder forever.
+
+If a future reader has questions, they can edit the diagram in the preview and open a PR. That is the entire point of diagrams as code.
+
+## Anti-patterns
+
+We have watched teams turn this into a half-day exercise. The patterns that drag it out:
+
+- **Trying to preserve the whiteboard's exact spatial layout.** Mermaid lays out diagrams its own way; fighting the auto-layout never wins.
+- **Capturing every annotation.** Whiteboards accumulate sticky notes and "??". The Mermaid source should not.
+- **Aiming for design polish in the first PR.** Theme tweaks and node colours can be a follow-up. Get the structure right first.
+
+## When to reach for a different tool
+
+If your photo is genuinely a freeform diagram — bubbles, hand-drawn icons, multi-coloured arrows that mean different things — Mermaid is not the destination. [Excalidraw](https://excalidraw.com/), [draw.io](https://www.drawio.com/), or a hand-redraw in Figma will preserve more of the original. The trade-off is that those formats live as binary or hosted documents; if you want diagrams in your repo, you accept Mermaid's layout choices.
+
+A reasonable compromise: keep the original photo in the repo as a `.jpg`, and add a Mermaid diagram next to it that captures **the structure**. Two artefacts, each doing what it is good at.

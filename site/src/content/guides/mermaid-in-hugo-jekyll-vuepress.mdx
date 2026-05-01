@@ -1,0 +1,98 @@
+---
+title: Mermaid in Hugo, Jekyll, and VuePress
+description: Three popular static site generators and the dance you need to do for each so Mermaid diagrams in your Markdown actually render in production.
+category: format-guide
+lastUpdated: 2026-05-01
+order: 4
+tags: ['hugo', 'jekyll', 'vuepress', 'static-site']
+---
+
+Static site generators usually render Markdown to HTML at build time. Mermaid, on the other hand, is a JavaScript library that produces SVG **at runtime in the browser**. To make the two work together, the SSG has to leave the Mermaid source in the page in a way the browser-side library can find later.
+
+This guide covers Hugo, Jekyll, and VuePress — each takes a slightly different shape.
+
+## Hugo
+
+Hugo (since v0.93) understands fenced `mermaid` code blocks but only emits raw HTML at build time; you still have to load the Mermaid library yourself. The recipe:
+
+1. Configure Hugo's Markdown engine to allow raw HTML pass-through. In `config.yaml`:
+   ```yaml
+   markup:
+     goldmark:
+       renderer:
+         unsafe: true
+   ```
+2. Add a render-hook for code blocks at `layouts/_default/_markup/render-codeblock-mermaid.html`:
+   ```html
+   <pre class="mermaid">{{- .Inner | safeHTML }}</pre>
+   {{ .Page.Store.Set "hasMermaid" true }}
+   ```
+3. In your base template, conditionally include Mermaid only on pages that contain a diagram:
+   ```html
+   {{ if .Page.Store.Get "hasMermaid" }}
+     <script type="module">
+       import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs';
+       mermaid.initialize({ startOnLoad: true, securityLevel: 'strict' });
+     </script>
+   {{ end }}
+   ```
+
+This keeps the Mermaid library off pages that don't need it — important if you care about Core Web Vitals on your home page.
+
+## Jekyll
+
+Jekyll has no built-in Mermaid awareness. Two routes work:
+
+**Route A — kramdown + a custom Liquid filter.** The cleanest result, but you write a small plugin. Inside `_plugins/mermaid.rb`, register a tag that wraps content in `<pre class="mermaid">`. Pages that use the tag emit the right HTML; the rest are unchanged.
+
+**Route B — kramdown's GFM mode + a global script.** Less plumbing. Configure `_config.yml` to use the GFM input:
+```yaml
+markdown: kramdown
+kramdown:
+  input: GFM
+```
+Then at the bottom of your default layout, include the Mermaid library and tell it to scan the page:
+```html
+<script type="module">
+  import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs';
+  mermaid.initialize({ startOnLoad: true, securityLevel: 'strict' });
+</script>
+```
+The trade-off is that Mermaid loads on every page, even ones with no diagram, costing roughly 200 KB of JavaScript. For a docs site this is usually acceptable; for a personal blog with twenty posts, prefer Route A.
+
+## VuePress
+
+VuePress 2 has good plugin support. The community plugin `@hsorby/vuepress-plugin-markdown-it-mermaid` (or the older `vuepress-plugin-mermaidjs`) handles the integration in three lines of `config.ts`:
+
+```ts
+import { defineUserConfig } from 'vuepress';
+import { mermaid } from '@hsorby/vuepress-plugin-markdown-it-mermaid';
+
+export default defineUserConfig({
+  plugins: [mermaid()],
+});
+```
+
+The plugin lazy-loads Mermaid only on pages that contain a fenced `mermaid` block, which is the right default. Themes follow VuePress' own light/dark mode automatically.
+
+## Hosting on GitHub Pages
+
+A **GitHub Pages** site built with Jekyll does **not** render Mermaid the same way the GitHub web UI does. The web UI runs Mermaid in JavaScript when displaying a `.md` file; Pages publishes static HTML produced by Jekyll, which by default has no idea what Mermaid is.
+
+If you migrate a repo's README into a Pages site, expect to add the Jekyll wiring above. The rendered output will look identical, but the path to get there is different.
+
+## Common pitfalls
+
+1. **Smart-quote replacement** — many SSG themes apply typographic substitutions that turn `"` into `"`/`"`. Mermaid rejects smart quotes. Make sure your code block escape rules apply.
+2. **Trailing-whitespace stripping** — some pre-processors trim trailing spaces inside fenced blocks. Mermaid is mostly tolerant, but `gantt` syntax with explicit spacing breaks if your build pipeline is too aggressive.
+3. **Lazy-loading caveat** — if you lazy-load Mermaid only on pages that need it, double-check your search index isn't surfacing those pages with a broken-looking diagram in the preview snippet.
+
+## A draft-then-paste workflow
+
+Whatever SSG you use, the development loop is fastest if you draft diagrams away from the build:
+
+1. Open [our preview](/preview/), iterate until the diagram looks right.
+2. Copy the source, paste into the Markdown.
+3. Build locally and verify the page renders the diagram, not the source.
+
+When the rendering differs between the preview and the deployed page, it's almost always a version skew between Mermaid in the preview (v11) and the version your SSG bundles. Pinning your SSG's Mermaid version is the durable fix.

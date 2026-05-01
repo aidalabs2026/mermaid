@@ -1,0 +1,133 @@
+---
+title: Common Mermaid parse errors and how to fix them
+description: A field guide to the parse errors you will hit in your first month with Mermaid, and the small syntax adjustments that resolve each one.
+category: troubleshooting
+lastUpdated: 2026-05-01
+order: 7
+tags: ['errors', 'troubleshooting', 'syntax']
+---
+
+Mermaid's parser is strict about a handful of things and forgiving about the rest. The errors you will see most often are spelling issues and quoting issues — fix those, and the library tends to render whatever you throw at it.
+
+This guide walks through ten errors, ordered by frequency.
+
+## 1. "Parse error" with no useful location
+
+The most common error message is the least helpful: just "Parse error". It almost always means **the first non-blank line is not a valid diagram type**.
+
+```
+flowchart TD
+  A --> B
+```
+
+works. `flowchart` alone does not. Neither does `flowchat TD` (a typo) or starting the source with a comment (`%% header`) before any diagram keyword. Always start with one of: `flowchart`, `sequenceDiagram`, `classDiagram`, `stateDiagram-v2`, `erDiagram`, `gantt`, `pie`, `mindmap`, `journey`, `gitGraph`, or `timeline`.
+
+## 2. "Invalid character" in node label
+
+Node labels that contain `(`, `)`, `:`, or `[]` confuse the parser unless quoted:
+
+```
+A[Step (1)]   ❌ may misparse the parentheses
+A["Step (1)"] ✅ quoted, parser leaves it alone
+```
+
+The fix: wrap any label that includes parentheses, colons, brackets, or pipe characters in double quotes.
+
+## 3. Smart quotes from a copy-paste
+
+If you drafted in a word processor or a chat client, Mermaid may reject your input with a parse error pointing at a line that *looks* identical to a working line. The culprit is a smart quote (`"` `"` `'` `'` instead of `"` and `'`). Re-paste through a plain-text editor, or run a `s/"/"/g` on the file.
+
+## 4. "Lexical error" in flowchart edges
+
+Flowchart edges have a small grammar:
+
+```
+A --> B            ✅
+A->B               ❌ (one dash)
+A -->> B           ❌ (sequence-style arrow in a flowchart)
+A -.-> B           ✅ (dashed)
+A == "label" ==> B ✅ (thick with label)
+```
+
+If you get a lexical error on an edge, count the dashes and brackets. The forms above are the canonical ones.
+
+## 5. Sequence diagram: arrow type mismatch
+
+Sequence diagrams use `->>` for synchronous calls and `-->>` for responses. Mixing them with flowchart-style `-->` produces:
+
+```
+sequenceDiagram
+  A->>B: hello   ✅
+  A-->B: bye     ❌ (use -->> for dashed)
+```
+
+The dashed arrow in a sequence diagram is **two** dashes followed by a doubled `>>`.
+
+## 6. Class diagram: generic types and tildes
+
+Class diagrams use `~` to denote generic type parameters:
+
+```
+class Box {
+  +list~String~ items
+}
+```
+
+A common mistake is to use `<>` like in code:
+
+```
++list<String> items   ❌ — angle brackets reserved for relationship arrows
++list~String~ items   ✅
+```
+
+If you see "Expected `}`" inside a class body, it is almost always angle brackets where tildes belong.
+
+## 7. State diagram: legacy keyword
+
+`stateDiagram` (v1) is deprecated; modern Mermaid wants `stateDiagram-v2`. Some renderers still accept v1, but if you copy a diagram between tools and one rejects it, switching the keyword fixes it without other changes.
+
+## 8. Gantt: ambiguous date format
+
+Gantt charts must declare a date format:
+
+```
+gantt
+  dateFormat YYYY-MM-DD
+  Task A :a1, 2026-05-01, 7d
+```
+
+Without `dateFormat`, Mermaid's defaults can interpret `01-02-2026` as 2 January or 1 February depending on the locale. Set `dateFormat` explicitly and you avoid the surprise.
+
+## 9. Pie: missing colon between label and value
+
+```
+pie
+  "A" 60   ❌
+  "A" : 60 ✅
+```
+
+Yes, pie's syntax is `label : value`. Forgetting the colon produces an unhelpful error somewhere on the next line.
+
+## 10. ER diagram: relationship cardinality typos
+
+ER cardinality uses specific glyphs:
+
+| Glyph | Meaning |
+|---|---|
+| `\|\|` | exactly one |
+| `o\|` | zero or one |
+| `\|{` | one or more |
+| `o{` | zero or more |
+
+Mistakes like `||--o*` (with `*`) or `||--o(` (with parens) produce a "no match" error. Double-check the glyphs match the table above.
+
+## Triage workflow
+
+When a parse error appears, work in this order:
+
+1. **Check the first line.** Wrong diagram keyword fixes 30% of errors.
+2. **Search for smart quotes** if you pasted from a word processor.
+3. **Look at the line number** the error reports — even when the message is vague, the line is usually right.
+4. **Reduce.** If a 60-line diagram won't render, comment out half (`%% comment`) and bisect until you find the bad line.
+
+[Our preview](/preview/) shows the first line of the parser error inline. That is enough to fix most cases, and re-rendering after each tweak is fast.
